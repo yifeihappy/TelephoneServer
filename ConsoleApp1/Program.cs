@@ -56,11 +56,12 @@ namespace ConsoleApp1
                     int receiveNumber = clientSocket.Receive(result);
                     if(receiveNumber<=0)break;
                     Console.WriteLine(minute+":"+second+"  receiveNUm:{0}",receiveNumber);
-                    //Console.WriteLine(""+minute+":"+second+
-                    //    "/接收客户端{0}消息{1}", clientSocket.RemoteEndPoint.ToString()
-                    //    , Encoding.ASCII.GetString(result, 0, receiveNumber));
+                    Console.WriteLine(""+minute+":"+second+
+                        "/接收客户端{0}消息{1}", clientSocket.RemoteEndPoint.ToString()
+                        , Encoding.ASCII.GetString(result, 0, receiveNumber));
                     String str = Encoding.ASCII.GetString(result, 0, receiveNumber);
                     String[] strArr = str.Split('\n');
+                    Console.WriteLine("strArr_L = {0}", strArr.Length);
                     for(int i=0;i<strArr.Length;i++)
                     {
                         if (strArr[i].Length == 0) continue;
@@ -69,10 +70,10 @@ namespace ConsoleApp1
                         if (sArr.Length != 5) continue;
                         SensorDataItem sditem = new SensorDataItem();
                         sditem.Type = Convert.ToInt32(sArr[0]);
-                        sditem.X = Convert.ToDouble(sArr[1]);
-                        sditem.Y = Convert.ToDouble(sArr[2]);
-                        sditem.Z = Convert.ToDouble(sArr[3]);
-                        sditem.Timestamp = Convert.ToUInt64(sArr[4]);
+                        sditem.Timestamp = Convert.ToUInt64(sArr[1]);                        
+                        sditem.X = Convert.ToDouble(sArr[2]);
+                        sditem.Y = Convert.ToDouble(sArr[3]);
+                        sditem.Z = Convert.ToDouble(sArr[4]);
 
                         sensorDataQueue.Enqueue(sditem);
                             
