@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp1
 {
-    class Program
+    class Program:ISensorDataService
     {
         private static byte[] result = new byte[1024];
         private static int myPort = 30000;//port
@@ -61,12 +61,12 @@ namespace ConsoleApp1
                         , Encoding.ASCII.GetString(result, 0, receiveNumber));
                     String str = Encoding.ASCII.GetString(result, 0, receiveNumber);
                     String[] strArr = str.Split('\n');
-                    Console.WriteLine("strArr_L = {0}", strArr.Length);
+                    //Console.WriteLine("strArr_L = {0}", strArr.Length);
                     for(int i=0;i<strArr.Length;i++)
                     {
                         if (strArr[i].Length == 0) continue;
                         string[] sArr = strArr[i].Split(',');
-                        Console.WriteLine("sARR.L={0}", sArr.Length);
+                        //Console.WriteLine("sARR.L={0}", sArr.Length);
                         if (sArr.Length != 5) continue;
                         SensorDataItem sditem = new SensorDataItem();
                         sditem.Type = Convert.ToInt32(sArr[0]);
@@ -91,5 +91,27 @@ namespace ConsoleApp1
             
             
         }
+
+        public List<SensorDataItem> tryDeque()
+        {
+            List<SensorDataItem> sensorDataList = new List<SensorDataItem>();
+            try
+            {
+                SensorDataItem sditem = new SensorDataItem();   
+                while(sensorDataQueue.TryDequeue(out sditem))
+                {
+                    sensorDataList.Add(sditem);
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            return sensorDataList;
+         
+
+        }
+
+        
     }
 }
