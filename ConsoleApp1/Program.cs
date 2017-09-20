@@ -34,13 +34,13 @@ namespace TelephoneSensorService
             //socket listent
             string name = Dns.GetHostName();
             IPAddress[] ipadrlist = Dns.GetHostAddresses(name);
-            //for(int j = 0;j<ipadrlist.Length;j++)
-            //{
-            //    Debug.WriteLine("server ip[{0}]:{1}",j, ipadrlist[j]);
-            //}
+            for (int j = 0; j < ipadrlist.Length; j++)
+            {
+                Debug.WriteLine("server ip[{0}]:{1}", j, ipadrlist[j]);
+            }
 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.Bind(new IPEndPoint(ipadrlist[3], myPort));
+            serverSocket.Bind(new IPEndPoint(ipadrlist[1], myPort));
             serverSocket.Listen(10);
             Console.WriteLine("启动监听{0}成功", serverSocket.LocalEndPoint.ToString());
             Thread socketThread = new Thread(ListenClientConnect);
