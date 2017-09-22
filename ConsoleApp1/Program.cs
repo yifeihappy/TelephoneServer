@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -25,11 +24,6 @@ namespace TelephoneSensorService
             host.Open();
 
             Console.WriteLine("CalculaorService已经启动，按任意键终止服务！");
-
-
-
-
-
 
             //socket listent
             string name = Dns.GetHostName();
