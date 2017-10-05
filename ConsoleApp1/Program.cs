@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleApp1;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
@@ -14,14 +15,20 @@ namespace TelephoneSensorService
 {
     class Program 
     {
-        private static byte[] result = new byte[1024];
+        private static byte[] result;
+        public static string sensorsType = null;//Android支持的传感器类型
         private static int myPort = 30000;//port
-        static Socket serverSocket;
+        static Socket serverSocket = null;
+        public static Socket clientSocket = null;
         public static ConcurrentQueue<SensorDataItem> sensorDataQueue = new ConcurrentQueue<SensorDataItem>();
         static void Main(string[] args)
         {
             ServiceHost host = new ServiceHost(typeof(SensorDataService1));
             host.Open();
+
+            ServiceHost hostSocket = new ServiceHost(typeof(SocketService1));
+            hostSocket.Open();
+
 
             Console.WriteLine("CalculaorService已经启动，按任意键终止服务！");
 
@@ -46,6 +53,9 @@ namespace TelephoneSensorService
             Console.ReadKey();
             host.Abort();
             host.Close();
+            hostSocket.Abort();
+            hostSocket.Close();
+
             Console.WriteLine("Close......");
 
             //socketThread.Abort();
@@ -55,7 +65,7 @@ namespace TelephoneSensorService
         {
             while (true)
             {
-                Socket clientSocket = serverSocket.Accept();
+                clientSocket = serverSocket.Accept();
                 Thread recvThread = new Thread(recvData);
                 recvThread.IsBackground = true;
                 recvThread.Start(clientSocket);
@@ -71,7 +81,7 @@ namespace TelephoneSensorService
                     DateTime curTime = System.DateTime.Now;
                     int minute = curTime.Minute;
                     int second = curTime.Second;
-                    result = new byte[1024];
+                    result = new byte[4096];
                     int receiveNumber = clientSocket.Receive(result);
                     if (receiveNumber <= 0) break;
                     Console.WriteLine(minute + ":" + second + "  receiveNUm:{0}", receiveNumber);
@@ -81,24 +91,29 @@ namespace TelephoneSensorService
                     String str = Encoding.ASCII.GetString(result, 0, receiveNumber);
                     String[] strArr = str.Split('\n');
                     //Console.WriteLine("strArr_L = {0}", strArr.Length);
-                    for (int i = 0; i < strArr.Length; i++)
+                    if(strArr[0].StartsWith("SENSORSTYPE"))
                     {
-                        if (strArr[i].Length == 0) continue;
-                        string[] sArr = strArr[i].Split(',');
-                        //Console.WriteLine("sARR.L={0}", sArr.Length);
-                        if (sArr.Length != 5) continue;
-                        SensorDataItem sditem = new SensorDataItem();
-                        sditem.Type = Convert.ToInt32(sArr[0]);
-                        sditem.Timestamp = Convert.ToUInt64(sArr[1]);
-                        sditem.X = Convert.ToDouble(sArr[2]);
-                        sditem.Y = Convert.ToDouble(sArr[3]);
-                        sditem.Z = Convert.ToDouble(sArr[4]);
-
-                        sensorDataQueue.Enqueue(sditem);
-
-
+                        //Console.WriteLine("SENSORSTYPE");
+                        Program.sensorsType = strArr[0];
                     }
+                    else
+                    {
+                        for (int i = 0; i < strArr.Length; i++)
+                        {
+                            if (strArr[i].Length == 0) continue;
+                            string[] sArr = strArr[i].Split(',');
+                            //Console.WriteLine("sARR.L={0}", sArr.Length);
+                            if (sArr.Length != 5) continue;//目前只能获取数据类型为(x, y, z)的传感器数据
+                            SensorDataItem sditem = new SensorDataItem();
+                            sditem.Type = Convert.ToInt32(sArr[0]);
+                            sditem.Timestamp = Convert.ToUInt64(sArr[1]);
+                            sditem.X = Convert.ToDouble(sArr[2]);
+                            sditem.Y = Convert.ToDouble(sArr[3]);
+                            sditem.Z = Convert.ToDouble(sArr[4]);
 
+                            sensorDataQueue.Enqueue(sditem);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -108,8 +123,7 @@ namespace TelephoneSensorService
                     break;
                 }
             }
-
-
         }
+
     }
 }

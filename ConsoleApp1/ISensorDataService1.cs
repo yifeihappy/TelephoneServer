@@ -20,5 +20,8 @@ namespace TelephoneSensorService
 
         [OperationContract]
         void ClearSensorDataQueue();
+
+        [OperationContract]
+        String getSensorsType();//获取Android支持的传感器类型
     }
 }

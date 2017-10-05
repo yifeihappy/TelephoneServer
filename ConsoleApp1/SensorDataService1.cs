@@ -17,12 +17,17 @@ namespace TelephoneSensorService
             //throw new NotImplementedException();
             while (Program.sensorDataQueue.TryDequeue(out sditem))
             {
-
             }
         }
 
         public void DoWork()
         {
+        }
+
+        public String getSensorsType()
+        {
+            //throw new NotImplementedException();
+            return Program.sensorsType;
         }
 
         public List<SensorDataItem> TryDeque()
