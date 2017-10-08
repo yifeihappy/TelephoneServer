@@ -20,6 +20,7 @@ namespace TelephoneSensorService
         private static int myPort = 30000;//port
         static Socket serverSocket = null;
         public static Socket clientSocket = null;
+        private static String msg = "";
         public static ConcurrentQueue<SensorDataItem> sensorDataQueue = new ConcurrentQueue<SensorDataItem>();
         static void Main(string[] args)
         {
@@ -73,6 +74,7 @@ namespace TelephoneSensorService
         }
         private static void recvData(object s)
         {
+
             Socket clientSocket = (Socket)s;
             while (true)
             {
@@ -81,39 +83,81 @@ namespace TelephoneSensorService
                     DateTime curTime = System.DateTime.Now;
                     int minute = curTime.Minute;
                     int second = curTime.Second;
-                    result = new byte[4096];
+                    result = new byte[1024*100];
+                    
                     int receiveNumber = clientSocket.Receive(result);
                     if (receiveNumber <= 0) break;
                     Console.WriteLine(minute + ":" + second + "  receiveNUm:{0}", receiveNumber);
                     Console.WriteLine("" + minute + ":" + second +
-                        "/接收客户端{0}消息{1}", clientSocket.RemoteEndPoint.ToString()
+                        "/接收客户端{0}消息\n{1}本次接收完毕", clientSocket.RemoteEndPoint.ToString()
                         , Encoding.ASCII.GetString(result, 0, receiveNumber));
                     String str = Encoding.ASCII.GetString(result, 0, receiveNumber);
-                    String[] strArr = str.Split('\n');
-                    //Console.WriteLine("strArr_L = {0}", strArr.Length);
-                    if(strArr[0].StartsWith("SENSORSTYPE"))
+                    msg += str;
+                    if(str.EndsWith("\n"))
                     {
-                        //Console.WriteLine("SENSORSTYPE");
-                        Program.sensorsType = strArr[0];
-                    }
-                    else
-                    {
-                        for (int i = 0; i < strArr.Length; i++)
+                        String[] strArr = msg.Split('\n');
+                        //Console.WriteLine("strArr_L = {0}", strArr.Length);
+                        if (strArr[0].StartsWith("SENSORSTYPE"))
                         {
-                            if (strArr[i].Length == 0) continue;
-                            string[] sArr = strArr[i].Split(',');
-                            //Console.WriteLine("sARR.L={0}", sArr.Length);
-                            if (sArr.Length != 5) continue;//目前只能获取数据类型为(x, y, z)的传感器数据
-                            SensorDataItem sditem = new SensorDataItem();
-                            sditem.Type = Convert.ToInt32(sArr[0]);
-                            sditem.Timestamp = Convert.ToUInt64(sArr[1]);
-                            sditem.X = Convert.ToDouble(sArr[2]);
-                            sditem.Y = Convert.ToDouble(sArr[3]);
-                            sditem.Z = Convert.ToDouble(sArr[4]);
-
-                            sensorDataQueue.Enqueue(sditem);
+                            //Console.WriteLine("SENSORSTYPE");
+                            Program.sensorsType = strArr[0];
                         }
+                        else
+                        {
+                            for (int i = 0; i < strArr.Length; i++)
+                            {
+                                if (strArr[i].Length == 0) continue;
+                                string[] sArr = strArr[i].Split(',');
+                                //Console.WriteLine("sARR.L={0}", sArr.Length);
+                                //if (sArr.Length != 5) continue;//目前只能获取数据类型为(x, y, z)的传感器数据
+                                SensorDataItem sditem = new SensorDataItem();
+                                sditem.Type = Convert.ToInt32(sArr[0]);
+                                sditem.Timestamp = Convert.ToUInt64(sArr[1]);
+                                sditem.X = Convert.ToDouble(sArr[2]);
+                                if (sArr.Length > 3)
+                                {
+                                    sditem.Y = Convert.ToDouble(sArr[3]);
+                                }
+                                if (sArr.Length > 4)
+                                {
+                                    sditem.Z = Convert.ToDouble(sArr[4]);
+                                }
+                                sensorDataQueue.Enqueue(sditem);
+                            }
+                        }
+                        msg = "";
                     }
+
+                    //String[] strArr = str.Split('\n');
+                    ////Console.WriteLine("strArr_L = {0}", strArr.Length);
+                    //if(strArr[0].StartsWith("SENSORSTYPE"))
+                    //{
+                    //    //Console.WriteLine("SENSORSTYPE");
+                    //    Program.sensorsType = strArr[0];
+                    //}
+                    //else
+                    //{
+                    //    for (int i = 0; i < strArr.Length; i++)
+                    //    { 
+                    //        if (strArr[i].Length == 0) continue;
+                    //        string[] sArr = strArr[i].Split(',');
+                    //        //Console.WriteLine("sARR.L={0}", sArr.Length);
+                    //        //if (sArr.Length != 5) continue;//目前只能获取数据类型为(x, y, z)的传感器数据
+                    //        SensorDataItem sditem = new SensorDataItem();
+                    //        sditem.Type = Convert.ToInt32(sArr[0]);
+                    //        sditem.Timestamp = Convert.ToUInt64(sArr[1]);
+                    //        sditem.X = Convert.ToDouble(sArr[2]);
+                    //        if(sArr.Length>3)
+                    //        {
+                    //            sditem.Y = Convert.ToDouble(sArr[3]);
+                    //        }
+                    //        if(sArr.Length>4)
+                    //        {
+                    //            sditem.Z = Convert.ToDouble(sArr[4]);
+                    //        }
+                    //        sensorDataQueue.Enqueue(sditem);
+                    //    }
+                    //}
                 }
                 catch (Exception ex)
                 {
