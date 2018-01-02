@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleApp1;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -16,7 +17,7 @@ namespace TelephoneSensorService
         void DoWork();
 
         [OperationContract]
-        List<SensorDataItem> TryDeque();
+        List<SensorDataItemXD> TryDeque();
 
         [OperationContract]
         void ClearSensorDataQueue();

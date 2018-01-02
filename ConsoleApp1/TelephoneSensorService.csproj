@@ -50,6 +50,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SensorDataItem.cs" />
+    <Compile Include="SensorDataItemXD.cs" />
     <Compile Include="SensorDataService1.cs" />
     <Compile Include="SocketService1.cs" />
   </ItemGroup>

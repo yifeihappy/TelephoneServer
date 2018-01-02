@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleApp1;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -13,9 +14,10 @@ namespace TelephoneSensorService
     {
         public void ClearSensorDataQueue()
         {
-            SensorDataItem sditem = new SensorDataItem();
+            //SensorDataItem sditem = new SensorDataItem();
+            SensorDataItemXD sditemXD = new SensorDataItemXD();
             //throw new NotImplementedException();
-            while (Program.sensorDataQueue.TryDequeue(out sditem))
+            while (Program.sensorDataQueue.TryDequeue(out sditemXD))
             {
             }
         }
@@ -30,16 +32,17 @@ namespace TelephoneSensorService
             return Program.sensorsType;
         }
 
-        public List<SensorDataItem> TryDeque()
+        public List<SensorDataItemXD> TryDeque()
         {
             // throw new NotImplementedException();
-            List<SensorDataItem> sensorDataList = new List<SensorDataItem>();
+            List<SensorDataItemXD> sensorDataList = new List<SensorDataItemXD>();
             try
             {
-                SensorDataItem sditem = new SensorDataItem();
-                while (Program.sensorDataQueue.TryDequeue(out sditem))
+                //SensorDataItem sditem = new SensorDataItem();
+                SensorDataItemXD sditemXD = new SensorDataItemXD();
+                while (Program.sensorDataQueue.TryDequeue(out sditemXD))
                 {
-                    sensorDataList.Add(sditem);
+                    sensorDataList.Add(sditemXD);
                 }
             }
             catch (Exception e)
